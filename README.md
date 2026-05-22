@@ -16,7 +16,7 @@ activate the python venv
 install the required libraries
 
 `
-pip install scipy matplotlib
+pip install scipy matplotlib myokit
 `
 
 Set your pythonpath to be able to access the required modules
