@@ -13,10 +13,16 @@ activate the python venv
 `
 . venv/bin/activate
 
+install the required libraries
+
+`
+pip install scipy matplotlib
+`
+
 Set your pythonpath to be able to access the required modules
 
 `
-export PYTHONPATH=/home/farg967/Documents/git_projects/Tutorial_ModelCalibration
+export PYTHONPATH=/path/to/Tutorial_ModelCalibration
 `
 
 Then run any of the scripts you want!
@@ -25,18 +31,24 @@ Then run any of the scripts you want!
 
 After creating your venv as above, create this configuration in vscode
 
-  "configurations": [
-      {
-          "name": "Python Debugger: Current File",
-          "type": "debugpy",
-          "request": "launch",
-          "program": "${file}",
-          "console": "integratedTerminal",
-          "python": "${workspaceFolder}/venv/bin/python",
-          "cwd": "${workspaceFolder}",
-          "env": {
-              "PYTHONPATH": "${workspaceFolder}"
-          }
-      }
-  ]
+{
+  "name": "Python Debugger: Current File",
+  "type": "debugpy",
+  "request": "launch",
+  "program": "${file}",
+  "console": "integratedTerminal",
+  "cwd": "${workspaceFolder}",
+  "env": {
+    "PYTHONPATH": "${workspaceFolder}"
+  },
+  "windows": {
+    "python": "${workspaceFolder}\\venv\\Scripts\\python.exe"
+  },
+  "linux": {
+    "python": "${workspaceFolder}/venv/bin/python"
+  },
+  "osx": {
+    "python": "${workspaceFolder}/venv/bin/python"
+  }
+}
 
