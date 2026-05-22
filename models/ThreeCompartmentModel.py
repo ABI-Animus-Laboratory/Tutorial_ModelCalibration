@@ -27,8 +27,7 @@ class ThreeCompartmentModel:
             cellml_path = os.path.join(here, '..', 'cellml_models', '3compartment.cellml')
 
         cellml_path = os.path.abspath(cellml_path)
-        importer = myokit.formats.importer('cellml')
-        self._model = importer.model(cellml_path)
+        self._model = myokit.formats.importer('cellml').model(cellml_path)
         self._model.validate()
 
         self.dt = dt
@@ -39,10 +38,8 @@ class ThreeCompartmentModel:
         self.t_sim = np.linspace(pre_time, self.stop_time, self.n_steps + 1)
 
         self._sim = myokit.Simulation(self._model)
-        self._default_state = self._sim.state()
-        self._last_log = None
 
-    def predict(self, param_names, param_vals, output_names, T=None, dt=None):
+    def predict(self, param_names, param_vals, output_names):
         '''
         Set parameters, run the simulation, and return (t, outputs).
 
@@ -56,47 +53,24 @@ class ThreeCompartmentModel:
         output_names : list of str
             Myokit qualified names of variables to return, e.g.
             ['aortic_root_module.u']
-        T : float, optional
-            Override sim_time for this call.
-        dt : float, optional
-            Override dt for this call.
 
         Returns
         -------
         t       : ndarray, shape (N,)
         outputs : list of ndarray, one per entry in output_names
         '''
-        if T is not None or dt is not None:
-            sim_time = T if T is not None else self.sim_time
-            step = dt if dt is not None else self.dt
-            n = int(sim_time / step)
-            t_log = np.linspace(self.pre_time, self.pre_time + sim_time, n + 1)
-            stop = self.pre_time + sim_time
-        else:
-            t_log = self.t_sim
-            stop = self.stop_time
-
-        for name, value in zip(param_names, param_vals):
-            var = self._model.get(name)
-            if var.is_constant():
-                self._sim.set_constant(name, value)
-            elif var.is_state():
-                state = list(self._sim.state())
-                state[var.index()] = value
-                self._sim.set_state(state)
-
         self._sim.reset()
-        self._sim.set_state(self._default_state)
+        for name, value in zip(param_names, param_vals):
+            self._sim.set_constant(name, value)
 
-        self._last_log = self._sim.run(
-            stop + 1e-9,
+        log = self._sim.run(
+            self.stop_time + 1e-9,
             log=output_names,
-            log_times=t_log,
+            log_times=self.t_sim,
         )
 
-        t = t_log
-        outputs = [np.array(self._last_log[name]) for name in output_names]
-        return t, outputs
+        outputs = [np.array(log[name]) for name in output_names]
+        return self.t_sim, outputs
 
     def generate_measurements(self, param_names, param_vals, output_names, sigma=500.0):
         '''
