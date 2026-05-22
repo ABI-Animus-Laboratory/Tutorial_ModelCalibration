@@ -1,0 +1,69 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+  Logistic Growth Model (CellML 1.0)
+
+  Describes a single population y growing logistically toward carrying capacity K:
+
+      dy/dt = r * y * (1 - y / K)
+
+  Parameters:
+    r  - intrinsic growth rate  [1/time]
+    K  - carrying capacity      [dimensionless]
+
+  Initial condition:
+    y(0) = 10  (set as a constant here; override via myokit sim.set_state)
+-->
+<model name="logistic_growth"
+       xmlns="http://www.cellml.org/cellml/1.0#"
+       xmlns:cellml="http://www.cellml.org/cellml/1.0#">
+
+  <units name="per_time">
+    <unit units="second" exponent="-1"/>
+  </units>
+
+  <!-- Environment component owns the independent variable (time) -->
+  <component name="environment">
+    <variable name="time" units="second" public_interface="out"/>
+  </component>
+
+  <!-- Logistic growth component -->
+  <component name="logistic">
+    <variable name="time" units="second" public_interface="in"/>
+    <variable name="y" units="dimensionless" initial_value="10.0"/>
+    <variable name="r" units="per_time"      initial_value="0.5"/>
+    <variable name="K" units="dimensionless" initial_value="1000.0"/>
+
+    <math xmlns="http://www.w3.org/1998/Math/MathML">
+      <!-- dy/dt = r * y * (1 - y/K) -->
+      <apply>
+        <eq/>
+        <apply>
+          <diff/>
+          <bvar><ci>time</ci></bvar>
+          <ci>y</ci>
+        </apply>
+        <apply>
+          <times/>
+          <ci>r</ci>
+          <ci>y</ci>
+          <apply>
+            <minus/>
+            <cn cellml:units="dimensionless">1</cn>
+            <apply>
+              <divide/>
+              <ci>y</ci>
+              <ci>K</ci>
+            </apply>
+          </apply>
+        </apply>
+      </apply>
+    </math>
+  </component>
+
+  <!-- Connect environment time to logistic component -->
+  <connection>
+    <map_components component_1="environment" component_2="logistic"/>
+    <map_variables variable_1="time" variable_2="time"/>
+  </connection>
+
+</model>
